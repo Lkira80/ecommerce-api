@@ -3,14 +3,18 @@ require('dotenv').config();
 const pool = require('./config/db');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-const userRoutes = require('./routes/users');
 
 
 // Middleware for JSON
 app.use(express.json());
+
+const userRoutes = require('./routes/users');
+const productRoutes = require('./routes/products');
+
 app.use('/users', userRoutes);
+app.use('/products', productRoutes);
 
 app.get('/', (req, res) => {
   res.send('API working');

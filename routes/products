@@ -1,61 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const { auth } = require('../middlewares/auth');
-
-
+const {
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct
+} = require('../controllers/productsController');
 
 // Get all products
-router.get('/', auth, async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM products'); // tu tabla real
-    res.json({
-      success: true,
-      user: req.user.email,
-      products: result.rows
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
+router.get('/', auth, getProducts);
 
 // Get product by ID
-router.get('/:id', auth, async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await pool.query('SELECT * FROM products WHERE id = $1', [id]);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
-    }
-    res.json({
-      success: true,
-      user: req.user.email,
-      product: result.rows[0]
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
+router.get('/:id', auth, getProductById);
 
 // Add product
-router.post('/', auth, async (req, res) => {
-  const { name, price } = req.body;
-  if (!name || !price) {
-    return res.status(400).json({ success: false, message: 'Missing data' });
-  }
+router.post('/', auth, createProduct);
 
-  try {
-    const result = await pool.query(
-      'INSERT INTO products (name, price) VALUES ($1, $2) RETURNING *',
-      [name, price]
-    );
-    res.status(201).json({
-      success: true,
-      user: req.user.email,
-      product: result.rows[0]
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
+// Update product
+router.put('/:id', auth, updateProduct);
+
+// Delete product
+router.delete('/:id', auth, deleteProduct);
 
 module.exports = router;
