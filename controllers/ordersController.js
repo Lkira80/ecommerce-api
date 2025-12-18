@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 
-// GET /orders 
+// GET /orders
 const getOrders = async (req, res) => {
   const userId = req.user.id;
 
@@ -16,7 +16,7 @@ const getOrders = async (req, res) => {
   }
 };
 
-// GET /orders/:id 
+// GET /orders/:id
 const getOrderById = async (req, res) => {
   const userId = req.user.id;
   const { id } = req.params;
@@ -49,25 +49,28 @@ const getOrderById = async (req, res) => {
   }
 };
 
-// POST /orders - CHECKOUT
+// POST /orders - CHECKOUT (CON TRANSACCIÓN)
 const createOrder = async (req, res) => {
   const userId = req.user.id;
+  const client = await pool.connect();
 
   try {
+    await client.query('BEGIN');
+
     // 1. Get cart
-    const cartRes = await pool.query(
+    const cartRes = await client.query(
       'SELECT * FROM carts WHERE user_id = $1',
       [userId]
     );
 
     if (cartRes.rows.length === 0) {
-      return res.status(400).json({ success: false, message: 'Cart is empty' });
+      throw new Error('Cart is empty');
     }
 
     const cartId = cartRes.rows[0].id;
 
-    // 2. Get items from cart
-    const itemsRes = await pool.query(
+    // 2. Get cart items
+    const itemsRes = await client.query(
       `SELECT ci.product_id, ci.quantity, p.price, p.stock
        FROM cart_items ci
        JOIN products p ON ci.product_id = p.id
@@ -76,57 +79,62 @@ const createOrder = async (req, res) => {
     );
 
     if (itemsRes.rows.length === 0) {
-      return res.status(400).json({ success: false, message: 'Cart has no items' });
+      throw new Error('Cart has no items');
     }
 
-    // 3. Check stock and calculate order
+    // 3. Validate stock + calculate total
     let total = 0;
 
     for (const item of itemsRes.rows) {
       if (item.quantity > item.stock) {
-        return res.status(400).json({
-          success: false,
-          message: `Not enough stock for product ${item.product_id}`
-        });
+        throw new Error(`Not enough stock for product ${item.product_id}`);
       }
       total += item.quantity * item.price;
     }
 
     // 4. Create order
-    const orderRes = await pool.query(
-      `INSERT INTO orders (user_id, total_amount)
-       VALUES ($1, $2)
+    const orderRes = await client.query(
+      `INSERT INTO orders (user_id, total_amount, status)
+       VALUES ($1, $2, 'pending')
        RETURNING *`,
       [userId, total]
     );
 
     const orderId = orderRes.rows[0].id;
 
-    // 5. Create order_items
+    // 5. Create order items + update stock
     for (const item of itemsRes.rows) {
-      await pool.query(
+      await client.query(
         `INSERT INTO order_items (order_id, product_id, quantity, price_at_buy)
          VALUES ($1, $2, $3, $4)`,
         [orderId, item.product_id, item.quantity, item.price]
       );
 
-      // 6. Update stock
-      await pool.query(
+      await client.query(
         'UPDATE products SET stock = stock - $1 WHERE id = $2',
         [item.quantity, item.product_id]
       );
     }
 
-    // 7. Empty cart
-    await pool.query('DELETE FROM cart_items WHERE cart_id = $1', [cartId]);
+    // 6. Empty cart
+    await client.query(
+      'DELETE FROM cart_items WHERE cart_id = $1',
+      [cartId]
+    );
+
+    await client.query('COMMIT');
 
     res.status(201).json({
       success: true,
       message: 'Order created successfully',
       order: orderRes.rows[0]
     });
+
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    await client.query('ROLLBACK');
+    res.status(400).json({ success: false, error: err.message });
+  } finally {
+    client.release();
   }
 };
 
@@ -135,3 +143,4 @@ module.exports = {
   getOrderById,
   createOrder
 };
+
