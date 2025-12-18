@@ -250,12 +250,56 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+
+// PATCH /orders/:id/pay - simulate payment test
+const payOrder = async (req, res) => {
+  const userId = req.user.id;
+  const { id } = req.params;
+
+  try {
+    // Verify the order is from the user
+    const orderRes = await pool.query(
+      'SELECT * FROM orders WHERE id = $1 AND user_id = $2',
+      [id, userId]
+    );
+
+    if (orderRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const order = orderRes.rows[0];
+
+    if (order.status !== 'pending') {
+      return res.status(400).json({ success: false, message: `Cannot pay an order with status ${order.status}` });
+    }
+
+    // 2. Update status to paid
+    const updated = await pool.query(
+      'UPDATE orders SET status = $1 WHERE id = $2 RETURNING *',
+      ['paid', id]
+    );
+
+    res.json({ success: true, message: 'Order paid successfully', order: updated.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+
+
+
+
+
+
+
+
 module.exports = {
   getOrders,
   getOrderById,
   createOrder,
   updateOrderStatus,
   cancelOrder,
-  getAllOrders
+  getAllOrders,
+  payOrder
 };
 

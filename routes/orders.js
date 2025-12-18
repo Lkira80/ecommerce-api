@@ -7,7 +7,7 @@ const {
   createOrder
 } = require('../controllers/ordersController');
 const { adminOnly } = require('../middlewares/roles');
-const { updateOrderStatus, cancelOrder, getAllOrders } = require('../controllers/ordersController');
+const { updateOrderStatus, cancelOrder, getAllOrders, payOrder } = require('../controllers/ordersController');
 
 router.get('/', auth, getOrders);
 router.get('/:id', auth, getOrderById);
@@ -15,5 +15,6 @@ router.post('/', auth, createOrder);
 router.put('/:id/status', auth, adminOnly, updateOrderStatus);
 router.put('/:id/cancel', auth, adminOnly, cancelOrder);
 router.get('/all', auth, adminOnly, getAllOrders);
+router.patch('/:id/pay', auth, payOrder);
 
 module.exports = router;
