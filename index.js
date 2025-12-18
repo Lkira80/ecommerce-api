@@ -3,6 +3,8 @@ require('dotenv').config();
 const pool = require('./config/db');
 const cartRoutes = require('./routes/cart');
 const ordersRoutes = require('./routes/orders');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +21,8 @@ app.use('/users', userRoutes);
 app.use('/products', productRoutes);
 app.use('/carts', cartRoutes);
 app.use('/orders', ordersRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+console.log('API docs available at http://localhost:3000/api-docs');
 
 app.get('/', (req, res) => {
   res.send('API working');
