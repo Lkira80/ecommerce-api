@@ -1,21 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser } = require('../controllers/usersController');
+const { 
+  registerUser, 
+  loginUser, 
+  getUsers, 
+  getUserById, 
+  updateUser, 
+  deleteUser 
+} = require('../controllers/usersController');
 const { auth } = require('../middlewares/auth');
 
-// Register
+// Public routes
 router.post('/register', registerUser);
-
-// Login route
 router.post('/login', loginUser);
 
-// User profile
-router.get('/profile', auth, (req, res) => {
-  res.json({
-    success: true,
-    message: `Hello ${req.user.email}, this is your profile`,
-    user: req.user
-  });
-});
+// Protected routes
+router.get('/', auth, getUsers);              // Get all users
+router.get('/:id', auth, getUserById);       // Get user by ID
+router.put('/:id', auth, updateUser);        // Update user
+router.delete('/:id', auth, deleteUser);     // Delete user
 
 module.exports = router;
