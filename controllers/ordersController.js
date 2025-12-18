@@ -138,9 +138,36 @@ const createOrder = async (req, res) => {
   }
 };
 
+// PUT /orders/:id/status
+const updateOrderStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const validStatuses = ['pending', 'paid', 'shipped', 'cancelled'];
+  if (!status || !validStatuses.includes(status)) {
+    return res.status(400).json({ success: false, message: `Invalid status. Valid statuses: ${validStatuses.join(', ')}` });
+  }
+
+  try {
+    const updated = await pool.query(
+      'UPDATE orders SET status = $1 WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+
+    if (updated.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    res.json({ success: true, message: 'Order status updated', order: updated.rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 module.exports = {
   getOrders,
   getOrderById,
-  createOrder
+  createOrder,
+  updateOrderStatus
 };
 
