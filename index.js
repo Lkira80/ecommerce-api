@@ -2,6 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const pool = require('./config/db');
 const cartRoutes = require('./routes/cart');
+const ordersRoutes = require('./routes/orders');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +18,7 @@ const productRoutes = require('./routes/products');
 app.use('/users', userRoutes);
 app.use('/products', productRoutes);
 app.use('/carts', cartRoutes);
+app.use('/orders', ordersRoutes);
 
 app.get('/', (req, res) => {
   res.send('API working');
