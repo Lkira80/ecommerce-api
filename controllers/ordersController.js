@@ -1,5 +1,35 @@
 const pool = require('../config/db');
 
+// GET /orders/all - view all orders (admin)
+const getAllOrders = async (req, res) => {
+  try {
+    const ordersRes = await pool.query(
+      'SELECT o.*, u.name AS user_name, u.email AS user_email FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY created_at DESC'
+    );
+
+    const orders = [];
+
+    for (const order of ordersRes.rows) {
+      const itemsRes = await pool.query(
+        `SELECT oi.id, oi.product_id, oi.quantity, oi.price_at_buy, p.name AS product_name
+         FROM order_items oi
+         JOIN products p ON oi.product_id = p.id
+         WHERE oi.order_id = $1`,
+        [order.id]
+      );
+
+      orders.push({
+        ...order,
+        items: itemsRes.rows
+      });
+    }
+
+    res.json({ success: true, orders });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 // GET /orders
 const getOrders = async (req, res) => {
   const userId = req.user.id;
@@ -164,10 +194,68 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+// Cancel order and return stock (admin)
+const cancelOrder = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Initialize transaction
+    await pool.query('BEGIN');
+
+    // Get and validate order
+    const orderRes = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
+    if (orderRes.rows.length === 0) {
+      await pool.query('ROLLBACK');
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const order = orderRes.rows[0];
+    if (order.status === 'cancelled') {
+      await pool.query('ROLLBACK');
+      return res.status(400).json({ success: false, message: 'Order already cancelled' });
+    }
+    if (order.status === 'shipped') {
+      await pool.query('ROLLBACK');
+      return res.status(400).json({ success: false, message: 'Cannot cancel shipped order' });
+    }
+
+    // Get items from order
+    const itemsRes = await pool.query(
+      'SELECT * FROM order_items WHERE order_id = $1',
+      [id]
+    );
+
+    // Give back stock
+    for (const item of itemsRes.rows) {
+      await pool.query(
+        'UPDATE products SET stock = stock + $1 WHERE id = $2',
+        [item.quantity, item.product_id]
+      );
+    }
+
+    // Update to 'cancelled'
+    const updated = await pool.query(
+      'UPDATE orders SET status = $1 WHERE id = $2 RETURNING *',
+      ['cancelled', id]
+    );
+
+    // Confirm transaction
+    await pool.query('COMMIT');
+
+    res.json({ success: true, message: 'Order cancelled and stock returned', order: updated.rows[0] });
+
+  } catch (err) {
+    await pool.query('ROLLBACK');
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 module.exports = {
   getOrders,
   getOrderById,
   createOrder,
-  updateOrderStatus
+  updateOrderStatus,
+  cancelOrder,
+  getAllOrders
 };
 

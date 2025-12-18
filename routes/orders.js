@@ -7,11 +7,13 @@ const {
   createOrder
 } = require('../controllers/ordersController');
 const { adminOnly } = require('../middlewares/roles');
-const { updateOrderStatus } = require('../controllers/ordersController');
+const { updateOrderStatus, cancelOrder, getAllOrders } = require('../controllers/ordersController');
 
 router.get('/', auth, getOrders);
 router.get('/:id', auth, getOrderById);
 router.post('/', auth, createOrder);
 router.put('/:id/status', auth, adminOnly, updateOrderStatus);
+router.put('/:id/cancel', auth, adminOnly, cancelOrder);
+router.get('/all', auth, adminOnly, getAllOrders);
 
 module.exports = router;
