@@ -31,8 +31,14 @@ const registerUser = async (req, res) => {
         [name, email, hashedPassword]
     );
 
+    // Generate token
+    const token = jwt.sign(
+      { id: newUser.rows[0].id, name: newUser.rows[0].name, email: newUser.rows[0].email },
+      process.env.JWT_SECRET || 'secretkey',
+      { expiresIn:'1h'}
+    )
 
-    res.status(201).json({ success: true, user: newUser.rows[0] });
+    res.status(201).json({ success: true, user: newUser.rows[0],token });
    } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Error al registrar usuario' });
