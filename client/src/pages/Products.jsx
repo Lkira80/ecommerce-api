@@ -28,15 +28,18 @@ function Products() {
   return (
     <div>
       <h2>Products</h2>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-        {products.map((product) => (
-          <div key={product.id} style={{ border: "1px solid #ccc", padding: "1rem", width: "200px" }}>
+      {products.length === 0 ? (
+        <p>No products available.</p>
+      ) : (
+        products.map((product) => (
+          <div key={product.id}>
             <h3>{product.name}</h3>
             <p>Price: ${product.price}</p>
             <button>Add to Cart</button>
+            <hr />
           </div>
-        ))}
-      </div>
+        ))
+      )}
     </div>
   );
 }

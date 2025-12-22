@@ -45,7 +45,7 @@ passport.use(
   )
 );
 
-passport.use(
+/*passport.use(
   new FacebookStrategy(
     {
       clientID: process.env.FACEBOOK_APP_ID,
@@ -84,7 +84,7 @@ passport.use(
       }
     }
   )
-);
+);*/
 
 passport.serializeUser((token, done) => done(null, token));
 passport.deserializeUser((token, done) => done(null, token));

@@ -10,10 +10,10 @@ const {
 } = require('../controllers/productsController');
 
 // Get all products
-router.get('/', auth, getProducts);
+router.get('/', getProducts);
 
 // Get product by ID
-router.get('/:id', auth, getProductById);
+router.get('/:id', getProductById);
 
 // Add product
 router.post('/', auth, createProduct);
