@@ -40,14 +40,16 @@ function ProductDetails() {
   if (!product) return <p>Product not found.</p>;
 
   return (
-    <div>
+    <div className="container">
+    <div className="card">
       <h2>{product.name}</h2>
       <p>Description: {product.description || "No description"}</p>
       <p>Price: ${product.price}</p>
       <p>Stock: {product.stock}</p>
       <button onClick={addToCart}>Add to Cart</button>
     </div>
-  );
+  </div>
+);
 }
 
 export default ProductDetails;

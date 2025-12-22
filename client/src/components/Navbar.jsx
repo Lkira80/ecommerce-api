@@ -6,27 +6,27 @@ function Navbar() {
   const { user, logout } = useContext(AuthContext);
 
   return (
-    <nav>
-      <Link to="/">Home</Link> |{" "}
-      <Link to="/products">Products</Link> |{" "}
-      {user && <Link to="/cart">Cart</Link>} |{" "}
-      {user && <Link to="/orders">Orders</Link>}
+     <nav className="navbar">
+      <div className="nav-left">
+        <Link to="/">Home</Link>
+        <Link to="/products">Products</Link>
+        {user && <Link to="/cart">Cart</Link>}
+        {user && <Link to="/orders">Orders</Link>}
+      </div>
 
-      {user ? (
-        <>
-          {" | "}
-          <span>Welcome {user.name}</span>
-          {" | "}
-          <button onClick={logout}>Logout</button>
-        </>
-      ) : (
-        <>
-          {" | "}
-          <Link to="/login">Login</Link>
-          {" | "}
-          <Link to="/register">Register</Link>
-        </>
-      )}
+      <div className="nav-right">
+        {user ? (
+          <>
+            <span>Welcome {user.name}</span>
+            <button onClick={logout}>Logout</button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+          </>
+        )}
+      </div>
     </nav>
   );
 }

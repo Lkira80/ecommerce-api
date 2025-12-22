@@ -70,25 +70,24 @@ function Cart() {
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div>
-      <h2>Your Cart</h2>
-      {cart.map((item, index) => (
-        <div key={`${item.product_id}-${index}`}>
-          <h3>{item.name}</h3>
-          <p>Price: ${item.price}</p>
-          <p>
-            Quantity: 
-            <button onClick={() => updateQuantity(item.product_id, item.quantity - 1)} disabled={item.quantity <= 1}>-</button>
-            {item.quantity}
-            <button onClick={() => updateQuantity(item.product_id, item.quantity + 1)}>+</button>
-          </p>
-          <button onClick={() => removeItem(item.product_id)}>Remove</button>
-          <hr />
-        </div>
-      ))}
-      <h3>Total: ${total.toFixed(2)}</h3>
-      <button onClick={handleCheckout}>Checkout</button>
+    <div className="container">
+  <h2>Your Cart</h2>
+  {cart.map((item) => (
+    <div key={item.product_id} className="card">
+      <h3>{item.name}</h3>
+      <p>Price: ${item.price}</p>
+      <p>Quantity: <span>{item.quantity}</span>
+  <span className="quantity-controls">
+    <button onClick={() => updateQuantity(item.product_id, item.quantity - 1)} disabled={item.quantity <= 1}>-</button>
+    <button onClick={() => updateQuantity(item.product_id, item.quantity + 1)}>+</button>
+  </span>
+</p>
+      <button onClick={() => removeItem(item.product_id)}>Remove</button>
     </div>
+  ))}
+  <h3>Total: ${total.toFixed(2)}</h3>
+  <button onClick={handleCheckout}>Checkout</button>
+</div>
   );
 }
 

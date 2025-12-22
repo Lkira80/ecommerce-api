@@ -3,6 +3,7 @@ import React from "react";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import { BrowserRouter as Router } from "react-router-dom";
+import "./styles/global.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

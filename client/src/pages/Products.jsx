@@ -26,13 +26,13 @@ function Products() {
   if (error) return <p>{error}</p>;
 
   return (
-    <div>
+    <div className="container">
       <h2>Products</h2>
       {products.length === 0 ? (
         <p>No products available.</p>
       ) : (
         products.map((product) => (
-          <div key={product.id}>
+          <div key={product.id} className="card">
             <h3>{product.name}</h3>
             <p>Price: ${product.price}</p>
             <Link to={`/products/${product.id}`}>View Details</Link>
