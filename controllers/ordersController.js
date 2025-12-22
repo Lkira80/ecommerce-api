@@ -1,5 +1,42 @@
 const pool = require('../config/db');
 
+// Get order history
+const getOrderHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const ordersResult = await pool.query(
+      `SELECT id, status, total, created_at
+       FROM orders
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+
+    const orders = [];
+
+    for (let order of ordersResult.rows) {
+      const itemsResult = await pool.query(
+        `SELECT oi.id, oi.product_id, oi.quantity, oi.price, p.name
+         FROM order_items oi
+         JOIN products p ON oi.product_id = p.id
+         WHERE oi.order_id = $1`,
+        [order.id]
+      );
+
+      orders.push({
+        ...order,
+        items: itemsResult.rows,
+      });
+    }
+
+    res.json({ success: true, orders });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 // GET /orders/all - view all orders (admin)
 const getAllOrders = async (req, res) => {
   try {
@@ -294,6 +331,7 @@ const payOrder = async (req, res) => {
 
 
 module.exports = {
+  getOrderHistory,
   getOrders,
   getOrderById,
   createOrder,
