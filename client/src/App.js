@@ -4,7 +4,6 @@ import PrivateRoute from "./components/PrivateRoute";
 import OAuthSuccess from "./components/OAuthSuccess";
 
 
-
 // Pages
 import Home from "./pages/Home";
 import Login from "./pages/Login";
