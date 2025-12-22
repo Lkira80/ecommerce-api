@@ -1,0 +1,38 @@
+1. Usuarios (Users)
+Método	Endpoint	Descripción
+POST	/users/register	Registrar un nuevo usuario
+POST	/users/login	Autenticación de usuario
+GET	/users/:id	Obtener información de un usuario
+PUT	/users/:id	Actualizar información del usuario
+DELETE	/users/:id	Eliminar un usuario
+
+2. Productos (Products)
+Método	Endpoint	Descripción
+GET	/products	Obtener lista de productos
+GET	/products/:id	Obtener un producto específico
+POST	/products	Crear un nuevo producto (Admin)
+PUT	/products/:id	Actualizar un producto (Admin)
+DELETE	/products/:id	Eliminar un producto (Admin)
+
+3. Categorías (Categories)
+Método	Endpoint	Descripción
+GET	/categories	Obtener lista de categorías
+GET	/categories/:id	Obtener detalles de una categoría
+POST	/categories	Crear una categoría (Admin)
+PUT	/categories/:id	Actualizar categoría (Admin)
+DELETE	/categories/:id	Eliminar categoría (Admin)
+
+4. Carrito de compras (Cart)
+Método	Endpoint	Descripción
+GET	/cart/:userId	Obtener carrito de un usuario
+POST	/cart/:userId/add	Agregar producto al carrito
+PUT	/cart/:userId/update	Actualizar cantidad de producto en el carrito
+DELETE	/cart/:userId/remove/:productId	Remover producto del carrito
+
+5. Órdenes (Orders)
+Método	Endpoint	Descripción
+GET	/orders/:userId	Obtener órdenes de un usuario
+GET	/orders/:id	Obtener detalles de una orden
+POST	/orders	Crear una nueva orden
+PUT	/orders/:id	Actualizar estado de una orden (Admin)
+DELETE	/orders/:id	Cancelar una orden
