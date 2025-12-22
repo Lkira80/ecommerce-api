@@ -16,7 +16,7 @@ function OAuthSuccess() {
     } else {
       navigate("/login");
     }
-  }, [location.search, login, navigate]);
+  }, []);
 
   return (
     <div style={{ textAlign: "center", marginTop: "2rem" }}>

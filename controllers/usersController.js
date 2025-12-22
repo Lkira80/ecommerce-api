@@ -63,6 +63,14 @@ const loginUser = async (req, res) => {
 
     const user = userResult.rows[0];
 
+  // OAuth Users
+  if (!user.password) {
+    return res.status(400).json({
+      success: false,
+      message: "Use Google or Facebook to log in"
+  });
+}
+
     // Compare pass
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {

@@ -18,7 +18,7 @@ function Login() {
       const res = await api.post("/users/login", { email, password });
 
       if (res.data.token) {
-        login(res.data.token); // Guarda token y usuario en AuthContext
+        login(res.data.token);
         navigate("/products");
       } else {
         alert("Login failed. Please check your credentials.");
@@ -29,10 +29,6 @@ function Login() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleThirdPartyLogin = (provider) => {
-    window.location.href = `${process.env.REACT_APP_API_URL}/auth/${provider}`;
   };
 
   return (
@@ -68,7 +64,9 @@ function Login() {
       <button onClick={() => window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`}>
         Login with Google
       </button>
-      <button onClick={() => handleThirdPartyLogin("facebook")}>Login with Facebook</button>
+      <button onClick={() => window.location.href = `${process.env.REACT_APP_API_URL}/auth/facebook`}>
+        Login with Facebook
+      </button>
 
       <p>
         Don't have an account? <Link to="/register">Register</Link>

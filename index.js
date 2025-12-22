@@ -5,7 +5,6 @@ const cartRoutes = require('./routes/cart');
 const ordersRoutes = require('./routes/orders');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
-const session = require("express-session");
 const passport = require("./config/passport");
 const authRoutes = require("./routes/auth");
 const checkoutRoutes = require("./routes/checkout");
@@ -33,15 +32,7 @@ app.use('/orders', ordersRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 console.log('API docs available at http://localhost:3000/api-docs');
 app.use("/auth", authRoutes);
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "secret",
-    resave: false,
-    saveUninitialized: true,
-  })
-);
 app.use(passport.initialize());
-app.use(passport.session());
 app.use("/checkout", checkoutRoutes);
 
 app.get('/', (req, res) => {

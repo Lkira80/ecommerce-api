@@ -7,18 +7,23 @@ function Navbar() {
 
   return (
     <nav>
-      <Link to="/">Home</Link>
-      <Link to="/products">Products</Link>
+      <Link to="/">Home</Link> |{" "}
+      <Link to="/products">Products</Link> |{" "}
+      {user && <Link to="/cart">Cart</Link>} |{" "}
+      {user && <Link to="/orders">Orders</Link>}
+
       {user ? (
         <>
-          <Link to="/cart">Cart</Link>
-          <Link to="/orders">Orders</Link>
-          <span>{user.name}</span>
+          {" | "}
+          <span>Welcome {user.name}</span>
+          {" | "}
           <button onClick={logout}>Logout</button>
         </>
       ) : (
         <>
+          {" | "}
           <Link to="/login">Login</Link>
+          {" | "}
           <Link to="/register">Register</Link>
         </>
       )}
@@ -27,4 +32,5 @@ function Navbar() {
 }
 
 export default Navbar;
+
 
