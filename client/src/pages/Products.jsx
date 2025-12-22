@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import api from "../services/api";
 
 function Products() {
@@ -33,7 +34,7 @@ function Products() {
       ) : (
         products.map((product) => (
           <div key={product.id}>
-            <h3>{product.name}</h3>
+            <h3><Link to={`/products/${product.id}`}>{product.name}</Link></h3>
             <p>Price: ${product.price}</p>
             <button>Add to Cart</button>
             <hr />

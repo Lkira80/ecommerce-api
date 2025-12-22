@@ -4,6 +4,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import OAuthSuccess from "./components/OAuthSuccess";
 
 
+
 // Pages
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -11,6 +12,7 @@ import Register from "./pages/Register";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
+import ProductDetails from "./pages/ProductDetails";
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
         <Route path="/login/success" element={<OAuthSuccess />} />
         <Route path="/register" element={<Register />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/products/:id" element={<ProductDetails />} />
 
         {/* Private routes */}
         <Route
