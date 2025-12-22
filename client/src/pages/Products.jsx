@@ -11,7 +11,7 @@ function Products() {
     const fetchProducts = async () => {
       try {
         const res = await api.get("/products");
-        setProducts(res.data.products); 
+        setProducts(res.data.products);
       } catch (err) {
         console.error(err);
         setError("Error fetching products");
@@ -19,7 +19,6 @@ function Products() {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -34,9 +33,9 @@ function Products() {
       ) : (
         products.map((product) => (
           <div key={product.id}>
-            <h3><Link to={`/products/${product.id}`}>{product.name}</Link></h3>
+            <h3>{product.name}</h3>
             <p>Price: ${product.price}</p>
-            <button>Add to Cart</button>
+            <Link to={`/products/${product.id}`}>View Details</Link>
             <hr />
           </div>
         ))

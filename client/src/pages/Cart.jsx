@@ -1,94 +1,92 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 
 function Cart() {
-  const [cartItems, setCartItems] = useState([]);
+  const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const res = await api.get("/cart"); 
-        setCartItems(res.data.items); 
-      } catch (err) {
-        console.error(err);
-        setError("Error fetching cart");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCart();
-  }, []);
-
-  // Delete item
-  const handleRemove = async (productId) => {
+  // Get cart from backend
+  const fetchCart = async () => {
     try {
-      await api.delete(`/cart/${productId}`);
-      setCartItems(cartItems.filter(item => item.product.id !== productId));
+      const res = await api.get("/checkout/cart");
+      setCart(res.data.items || []);
     } catch (err) {
       console.error(err);
-      alert("Error removing item");
+      setError("Error fetching cart");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Update quantity
-  const handleUpdateQuantity = async (productId, quantity) => {
-    if (quantity < 1) return;
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  // Change quantity
+  const updateQuantity = async (product_id, quantity) => {
     try {
-      const res = await api.put(`/cart/${productId}`, { quantity });
-      setCartItems(cartItems.map(item =>
-        item.product.id === productId ? res.data.item : item
-      ));
+      await api.put(`/checkout/cart/${product_id}`, { quantity });
+      fetchCart(); // refresh
     } catch (err) {
       console.error(err);
       alert("Error updating quantity");
     }
   };
 
-  // Checkout
-  const handleCheckout = async () => {
+  // Delete item
+  const removeItem = async (product_id) => {
     try {
-      const res = await api.post("/checkout/create-checkout-session", {
-        items: cartItems.map(({ product, quantity }) => ({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          quantity,
-        })),
-      });
-
-      // Redirect to Stripe Checkout
-      window.location.href = res.data.url;
+      await api.delete(`/checkout/cart/${product_id}`);
+      fetchCart();
     } catch (err) {
       console.error(err);
-      alert("Error creating checkout session");
+      alert("Error removing item");
     }
   };
 
-  // Render
+  // Checkout
+  const handleCheckout = async () => {
+  try {
+    const res = await api.post("/checkout/create-checkout-session", {
+      items: cart.map(item => ({
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        product_id: item.product_id
+      }))
+    });
+    window.location.href = res.data.url; // redirect to Stripe
+  } catch (err) {
+    console.error(err);
+    alert("Error creating checkout session");
+  }
+};
+
   if (loading) return <p>Loading cart...</p>;
   if (error) return <p>{error}</p>;
-  if (cartItems.length === 0) return <p>Your cart is empty</p>;
+  if (cart.length === 0) return <p>Your cart is empty.</p>;
+
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <div>
       <h2>Your Cart</h2>
-      <ul>
-        {cartItems.map(({ product, quantity }) => (
-          <li key={product.id}>
-            <p>{product.name} - ${product.price} x {quantity}</p>
-            <button onClick={() => handleUpdateQuantity(product.id, quantity - 1)}>-</button>
-            <button onClick={() => handleUpdateQuantity(product.id, quantity + 1)}>+</button>
-            <button onClick={() => handleRemove(product.id)}>Remove</button>
-          </li>
-        ))}
-      </ul>
-      <p>
-        Total: $
-        {cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)}
-      </p>
+      {cart.map((item, index) => (
+        <div key={`${item.product_id}-${index}`}>
+          <h3>{item.name}</h3>
+          <p>Price: ${item.price}</p>
+          <p>
+            Quantity: 
+            <button onClick={() => updateQuantity(item.product_id, item.quantity - 1)} disabled={item.quantity <= 1}>-</button>
+            {item.quantity}
+            <button onClick={() => updateQuantity(item.product_id, item.quantity + 1)}>+</button>
+          </p>
+          <button onClick={() => removeItem(item.product_id)}>Remove</button>
+          <hr />
+        </div>
+      ))}
+      <h3>Total: ${total.toFixed(2)}</h3>
       <button onClick={handleCheckout}>Checkout</button>
     </div>
   );

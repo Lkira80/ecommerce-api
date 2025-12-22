@@ -1,15 +1,13 @@
-import { useState, useEffect, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { AuthContext } from "../context/AuthContext";
 
 function ProductDetails() {
   const { id } = useParams();
-  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -23,41 +21,31 @@ function ProductDetails() {
         setLoading(false);
       }
     };
-
     fetchProduct();
   }, [id]);
 
-  const handleAddToCart = async () => {
-    if (!user) {
-      alert("You must be logged in to add items to the cart");
-      return;
-    }
-
-    setAdding(true);
+  const addToCart = async () => {
     try {
-      await api.post("/carts", { product_id: product.id, quantity: 1 });
+      await api.post("/checkout/cart", { product_id: product.id, quantity: 1 });
       alert("Product added to cart!");
+      navigate("/cart");
     } catch (err) {
       console.error(err);
-      alert("Failed to add product to cart");
-    } finally {
-      setAdding(false);
+      alert("Error adding product to cart");
     }
   };
 
   if (loading) return <p>Loading product...</p>;
   if (error) return <p>{error}</p>;
-  if (!product) return <p>Product not found</p>;
+  if (!product) return <p>Product not found.</p>;
 
   return (
     <div>
       <h2>{product.name}</h2>
-      <p>{product.description}</p>
+      <p>Description: {product.description || "No description"}</p>
       <p>Price: ${product.price}</p>
       <p>Stock: {product.stock}</p>
-      <button onClick={handleAddToCart} disabled={adding}>
-        {adding ? "Adding..." : "Add to Cart"}
-      </button>
+      <button onClick={addToCart}>Add to Cart</button>
     </div>
   );
 }
