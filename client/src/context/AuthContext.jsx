@@ -1,5 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+
 
 export const AuthContext = createContext();
 
@@ -7,25 +9,42 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  const validateToken = (token) => {
+    try {
+      const decoded = jwtDecode(token);
+      const now = Date.now() / 1000; // timestamp in secs
+      if (decoded.exp < now) {
+        return null;
+      }
+      return decoded;
+    } catch (err) {
+      return null;
+    }
+  };
+
   // Token on Storage on Init
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      // Decodify token
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      setUser({ id: payload.id, name: payload.name, email: payload.email });
+    const decoded = token ? validateToken(token) : null;
+    if (decoded) {
+      setUser({ id: decoded.id, name: decoded.name, email: decoded.email });
+    } else {
+      localStorage.removeItem("token");
+      setUser(null);
     }
   }, []);
 
-  // Login
   const login = (token) => {
+    const decoded = validateToken(token);
+    if (!decoded) {
+      logout();
+      return;
+    }
     localStorage.setItem("token", token);
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    setUser({ id: payload.id, name: payload.name, email: payload.email });
+    setUser({ id: decoded.id, name: decoded.name, email: decoded.email });
     navigate("/products");
   };
 
-  // Logout
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);

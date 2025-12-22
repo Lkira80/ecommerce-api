@@ -13,13 +13,17 @@ function OAuthSuccess() {
 
     if (token) {
       login(token);
-      setTimeout(() => navigate("/products"), 500);
     } else {
       navigate("/login");
     }
-  }, []);
+  }, [location.search, login, navigate]);
 
-  return <p>Redirecting...</p>;
+  return (
+    <div style={{ textAlign: "center", marginTop: "2rem" }}>
+      <h2>Login successful!</h2>
+      <p>Redirecting to your products...</p>
+    </div>
+  );
 }
 
 export default OAuthSuccess;
